@@ -116,7 +116,18 @@ public class EmrTlsFromSecretsManager extends AbstractEmrTlsProvider {
 		}
 		else {
 			ByteBuffer binarySecretData = getSecretValueResult.getSecretBinary();
-			secret = new String(Base64.getDecoder().decode(binarySecretData).array());
+			secret = new String(Base64.getDecoder().decode(binarySecretData.array()));
+		}
+
+		// If the secret is PEM-encoded, extract the Base64 part
+		if (secret.contains("-----BEGIN") && secret.contains("-----END")) {
+			StringBuilder base64Data = new StringBuilder();
+			for (String line : secret.split("\n")) {
+				if (!line.startsWith("-----")) {
+					base64Data.append(line.trim());
+				}
+			}
+			secret = base64Data.toString();
 		}
 
 //		System.out.println(secret);
