@@ -13,7 +13,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <aws-sdk-version>1.12.472</aws-sdk-version>
         <fully-qualified-main-class>com.amazonaws.awssamples.EmrTlsFromSecretsManager</fully-qualified-main-class>
-<!--        <fully-qualified-main-class>com.amazonaws.awssamples.EmrTlsFromCertificateManager</fully-qualified-main-class>-->
     </properties>
     <dependencies>
         <!-- AWS SDK Dependencies -->
@@ -109,6 +108,42 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                </configuration>
+            </plugin>
+            <!-- Surefire plugin for unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <!-- Failsafe plugin for integration tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <javax.net.ssl.keyStore>${project.build.directory}/../test-keystores/keystore.jks</javax.net.ssl.keyStore>
+                        <javax.net.ssl.keyStorePassword>changeit</javax.net.ssl.keyStorePassword>
+                        <javax.net.ssl.trustStore>${project.build.directory}/../test-keystores/truststore.jks</javax.net.ssl.trustStore>
+                        <javax.net.ssl.trustStorePassword>changeit</javax.net.ssl.trustStorePassword>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>

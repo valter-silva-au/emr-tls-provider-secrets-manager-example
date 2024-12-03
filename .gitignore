@@ -1,3 +1,11 @@
 .idea/
 target/
 .DS_Store
+
+# Test certificates and keystores
+test-certs/
+test-keystores/
+*.jks
+*.p12
+*.pem
+*.key
