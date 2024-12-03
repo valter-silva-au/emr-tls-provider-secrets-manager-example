@@ -21,6 +21,9 @@ public class TlsArtifactsManager {
     private String privateKeySecret;
     private String certificateSecret;
     private String certificateChainSecret;
+    
+    // Cache for TLS artifacts
+    private volatile TLSArtifacts cachedArtifacts;
 
     public TlsArtifactsManager(SecretsManagerClient secretsManagerClient) {
         this.secretsManagerClient = secretsManagerClient;
@@ -31,6 +34,8 @@ public class TlsArtifactsManager {
         this.privateKeySecret = privateKeySecret;
         this.certificateSecret = certificateSecret;
         this.certificateChainSecret = certificateSecret; // Using same secret for cert and chain
+        // Clear cache when secret names change
+        this.cachedArtifacts = null;
     }
 
     /**
@@ -38,14 +43,44 @@ public class TlsArtifactsManager {
      * @return TLSArtifacts containing the private key and certificates
      */
     public TLSArtifacts getTlsArtifacts() {
-        String privateKeyContent = secretsManagerClient.getSecret(privateKeySecret);
-        String certificateContent = secretsManagerClient.getSecret(certificateSecret);
-        
-        PrivateKey privateKey = certificateConverter.getPrivateKey(privateKeyContent);
-        List<Certificate> certChain = certificateConverter.getX509FromString(certificateContent);
-        List<Certificate> certs = certificateConverter.getX509FromString(certificateContent);
+        // Return cached artifacts if available
+        if (cachedArtifacts != null) {
+            return cachedArtifacts;
+        }
 
-        return new TLSArtifacts(privateKey, certChain, certs);
+        synchronized (this) {
+            // Double-check locking to prevent multiple initializations
+            if (cachedArtifacts != null) {
+                return cachedArtifacts;
+            }
+
+            try {
+                String privateKeyContent = secretsManagerClient.getSecret(privateKeySecret);
+                String certificateContent = secretsManagerClient.getSecret(certificateSecret);
+                
+                PrivateKey privateKey = certificateConverter.getPrivateKey(privateKeyContent);
+                List<Certificate> certChain = certificateConverter.getX509FromString(certificateContent);
+                List<Certificate> certs = certificateConverter.getX509FromString(certificateContent);
+
+                cachedArtifacts = new TLSArtifacts(privateKey, certChain, certs);
+                return cachedArtifacts;
+            } catch (Exception e) {
+                logger.error("Failed to retrieve TLS artifacts", e);
+                // If we fail to get new artifacts and have cached ones, use those
+                if (cachedArtifacts != null) {
+                    logger.warn("Using cached TLS artifacts due to retrieval failure");
+                    return cachedArtifacts;
+                }
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Forces a refresh of the TLS artifacts by clearing the cache
+     */
+    public void refreshArtifacts() {
+        this.cachedArtifacts = null;
     }
 
     /**
