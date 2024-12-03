@@ -11,11 +11,12 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <aws-sdk-version>1.11.339</aws-sdk-version>
+        <aws-sdk-version>1.12.472</aws-sdk-version>
         <fully-qualified-main-class>com.amazonaws.awssamples.EmrTlsFromSecretsManager</fully-qualified-main-class>
 <!--        <fully-qualified-main-class>com.amazonaws.awssamples.EmrTlsFromCertificateManager</fully-qualified-main-class>-->
     </properties>
     <dependencies>
+        <!-- AWS SDK Dependencies -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-emr</artifactId>
@@ -55,6 +56,32 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk14</artifactId>
             <version>1.70</version>
+        </dependency>
+
+        <!-- Logging Dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version>
+        </dependency>
+        
+        <!-- Testing Dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.5.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
